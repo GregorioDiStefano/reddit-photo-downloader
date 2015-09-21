@@ -15,11 +15,6 @@ class Utils(object):
 
 class MyTests(unittest.TestCase):
 
-    imgur_settings = {
-        "imgur_client_id": "99d1b0a07a1f84b",
-        "imgur_client_secret": "4c5a1c42c3681557addb6b92c05649fbbbd97a51",
-    }
-
     reddit_settings = {
         "user_agent": "Chrome",
         "limit_per_subreddit" : 50,
@@ -32,8 +27,7 @@ class MyTests(unittest.TestCase):
         pass
 
     def test_create_reddit_client(self):
-        ri1 = RedditImger.RedditImger(self.imgur_settings,
-                                     self.reddit_settings,
+        ri1 = RedditImger.RedditImger(self.reddit_settings,
                                      self.subreddit)
 
         self.assertIsInstance(ri1.reddit_client, praw.Reddit)
@@ -71,8 +65,7 @@ class MyTests(unittest.TestCase):
         self.assertTrue(a.check_and_set("a"))
 
     def test_reddit_client(self):
-        ri1 = RedditImger.RedditImger(self.imgur_settings,
-                                     self.reddit_settings,
+        ri1 = RedditImger.RedditImger(self.reddit_settings,
                                      self.subreddit)
 
         ri1.start()

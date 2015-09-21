@@ -41,7 +41,7 @@ class Cacher(object):
 
     def save_cache(self):
         print self.data
-        cPickle.dump(self.data, file(self.realm + ".p", "wb"))
+        cPickle.dump(self.data, file(self.fn, "wb"))
 
 class ThreadedDownloader(object):
     num_fetch_threads = 10
@@ -138,7 +138,7 @@ class RedditImger(object):
     downloader = None
     enclosure_queue = Queue()
 
-    def __init__(self, imgur_settings={}, reddit_settings={}, subreddits=[]):
+    def __init__(self, reddit_settings={}, subreddits=[]):
 
         try:
             self.reddit_settings = reddit_settings
