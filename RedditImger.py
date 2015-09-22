@@ -7,6 +7,10 @@ import os
 import hashlib
 import urllib3
 import cPickle
+import logging
+
+
+logging.basicConfig(level=logging.INFO)
 
 """
     Prevent useless HTTP req. and API uses if a certain item has been seen
@@ -21,8 +25,8 @@ class Cacher(object):
         try:
             self.realm = realm
             self.fn = self.realm + ".p"
-            f = open(self.fn)
-        except Exception, e:
+            open(self.fn)
+        except Exception:
             self.data = []
         else:
             self.data = cPickle.load(open(self.fn, "rb"))
@@ -40,18 +44,18 @@ class Cacher(object):
         return True
 
     def save_cache(self):
-        print self.data
         cPickle.dump(self.data, file(self.fn, "wb"))
 
 class ThreadedDownloader(object):
-    num_fetch_threads = 10
+    num_fetch_threads = None
     queue = Queue()
     mutex = Lock()
     sr_dirs_created = []
     download_dir = ""
 
-    def __init__(self, dl_dir="images"):
+    def __init__(self, dl_dir="images", num_fetch_threads=10):
         self.download_dir = dl_dir
+        self.num_fetch_threads = num_fetch_threads
         if not os.path.exists(dl_dir):
             os.mkdir(dl_dir)
 
@@ -67,19 +71,17 @@ class ThreadedDownloader(object):
 
     def start(self):
         # Set up some threads to fetch the enclosures
-        for i in range(self.num_fetch_threads):
-            worker = Thread(target=self.work, args=())
+        for c, _ in enumerate(range(self.num_fetch_threads)):
+            worker = Thread(target=self.work, args=(c,))
             worker.setDaemon(True)
             worker.start()
         self.queue.join()
-        print "Done!"
+        logging.info("All threads are done.")
 
-    def work(self):
-        print "Starting thread!", self.queue.qsize()
+    def work(self, thread_number):
+        logging.info("Starting thread #%d. qsize currently: %d" %  (thread_number, self.queue.qsize()))
 
         while self.queue.qsize():
-
-            print "Size: ", self.queue.qsize()
 
             self.mutex.acquire()
             dl = self.queue.get()
@@ -167,5 +169,4 @@ class RedditImger(object):
         self.downloader.set_queue(self.enclosure_queue)
         self.downloader.start()
         self.cacher.save_cache()
-
 
